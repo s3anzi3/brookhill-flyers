@@ -16,8 +16,12 @@
   <script src="./image-slot.js"></script>
   <style>
     @keyframes marqueeBulb {
-      0%, 100% { opacity:0.3;  transform:translate(-50%,-50%) scale(0.8); box-shadow:0 0 4px rgba(255,200,80,0.4); }
-      45%      { opacity:1;    transform:translate(-50%,-50%) scale(1.25); box-shadow:0 0 12px rgba(255,210,90,1),0 0 22px rgba(255,150,30,0.7); }
+      /* Animate only opacity + transform — both GPU-composited, no per-frame
+         repaint. The glow is a static box-shadow on the bulb (see image-slot
+         render); opacity fades the whole element incl. its shadow, so the
+         bulbs still pulse without repainting ~50 shadows every frame. */
+      0%, 100% { opacity:0.3;  transform:translate(-50%,-50%) scale(0.8); }
+      45%      { opacity:1;    transform:translate(-50%,-50%) scale(1.25); }
     }
     @keyframes sprayDrift {
       0%,100% { transform:translate(0,0) scale(1); }
@@ -194,7 +198,9 @@ class Component extends DCLogic {
           height: '9px',
           borderRadius: '50%',
           background: 'radial-gradient(circle at 35% 30%, #fff 0%, ' + c + ' 55%, ' + c + ' 100%)',
+          boxShadow: '0 0 11px rgba(255,205,85,0.9)',
           transform: 'translate(-50%,-50%)',
+          willChange: 'opacity, transform',
           animation: 'marqueeBulb 1.1s ease-in-out infinite',
           animationDelay: (i * 0.06).toFixed(2) + 's',
         },
